@@ -101,7 +101,9 @@ export default {
               'Required shape: {"project_name":"short-name","summary":"brief summary","files":[{"path":"index.html","content":"complete file contents"}],"run_instructions":["step one"]}.',
               "Generate a small, complete, useful first version of the requested project, not just a plan.",
               "Include all essential source files and sensible responsive styling. Prefer plain HTML, CSS and JavaScript unless the user requests a framework.",
-              "Maximum 8 files. Keep each file concise. Every file must contain its complete contents, not placeholders or ellipses.",
+              "Maximum 8 files. Prefer 3-5 files for a first version. Keep each file concise. Every file must contain its complete contents, not placeholders or ellipses.",
+              "Do not put Markdown code fences inside file contents. Escape JSON strings correctly. Do not put backslashes before HTML angle brackets.",
+              "run_instructions must be a JSON array of short strings.",
               "Do not include secrets, API keys, passwords, or unsafe destructive commands.",
               "Use relative paths only. Never use ../, absolute paths, or backslashes.",
               "If critical information is missing, make reasonable safe assumptions and state them in summary or run_instructions.",
@@ -110,7 +112,7 @@ export default {
           },
           { role: "user", content: prompt }
         ],
-        max_tokens: 3500
+        max_tokens: 5000
       });
 
       const raw = result?.response || result?.result || "";
