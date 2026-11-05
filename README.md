@@ -1,21 +1,32 @@
-# Raymond AI
+# Raymond AI Command Center
 
-Raymond AI is being built as a cloud-based command center. The initial milestone is a protected Cloudflare Workers AI endpoint. GitHub Actions deploys the worker; the user's computer does not need to stay on.
+Raymond AI is a cloud-hosted command center powered by Cloudflare Workers AI. It is designed to work from a phone or computer without keeping a personal PC switched on.
 
-## Current milestone
+## Live features
 
-- Cloudflare Worker with a Workers AI binding.
-- Health endpoint at `/health`.
-- Protected chat endpoint at `/chat`.
-- GitHub Actions deployment on changes to the worker files.
+- Responsive browser dashboard served by the Cloudflare Worker.
+- Protected AI chat endpoint at `/chat`.
+- Protected project-file generation endpoint at `/generate`.
+- Generated files are path-validated, size-limited, previewable, and downloadable individually or as a ZIP.
+- GitHub Actions deploys Worker and static dashboard changes.
 
-## Required GitHub Actions secrets
+## Endpoints
+
+- `GET /` — dashboard.
+- `GET /health` — service health.
+- `POST /chat` — AI planning/chat.
+- `POST /generate` — generate a small project file bundle.
+
+Both POST endpoints require `Authorization: Bearer <RAYMOND_AI_ACCESS_KEY>` and JSON body `{"prompt":"..."}`.
+
+## GitHub Actions secrets
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
+- `RAYMOND_AI_ACCESS_KEY`
 
-The Worker also requires a runtime secret named `RAYMOND_AI_ACCESS_KEY`. It is intentionally not stored in this repository. Configure it as a Worker secret before using the chat endpoint.
+The private access key is stored as a Worker secret by the deployment workflow and is never committed to this repository.
 
-## Important
+## Important limitations
 
-This first milestone provides AI responses only. It does not yet create files, run tests, or deploy websites to InfinityFree. Those capabilities will be added as separate, testable milestones. Workers AI usage is subject to Cloudflare's current free allocation and service limits.
+Project generation currently returns downloadable files. It does not yet commit generated projects to GitHub, run their build/tests, or deploy them to InfinityFree. Those steps require a separate authenticated execution and hosting integration. Generated code must be reviewed before use. Workers AI usage is subject to Cloudflare's current service limits and free allocation.
