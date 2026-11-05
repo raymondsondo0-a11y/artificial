@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "raymond-ai-engine",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-05",
+  "ai": {
+    "binding": "AI"
+  }
+}
