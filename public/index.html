@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a35">
+  <title>Raymond AI Command Center</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1226;--panel:#121f3d;--panel2:#18294d;--line:#2a3d66;--text:#f4f7ff;--muted:#aab8d5;--blue:#5c8dff;--gold:#f3c66b;--green:#45d6a0}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);background:radial-gradient(ellipse at 15% 10%,#203b70 0,transparent 36%),radial-gradient(ellipse at 90% 85%,#3b285f 0,transparent 34%),var(--bg)}
+    .shell{max-width:1100px;margin:auto;padding:28px 18px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}.brand{display:flex;align-items:center;gap:13px}.mark{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),#8d62df);font-weight:900;font-size:22px;box-shadow:0 8px 28px #426fe455}.brand h1{font-size:20px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}.status{display:flex;align-items:center;gap:8px;border:1px solid #286a5c;background:#10392f;color:#a9ffdc;padding:9px 12px;border-radius:30px;font-size:12px}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px var(--green)}
+    .hero{padding:30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(125deg,#172b50ed,#17203deb);box-shadow:0 20px 60px #0005}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:800}.hero h2{font-size:clamp(27px,5vw,43px);line-height:1.12;margin:12px 0}.hero p{color:var(--muted);max-width:680px;line-height:1.7;margin:0}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px;margin-top:18px}.panel{border:1px solid var(--line);border-radius:20px;background:#111d37ed;padding:20px;min-width:0}.panel h3{margin:0 0 7px;font-size:16px}.sub{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 17px}.field{display:block;font-size:12px;color:#d6e0f7;margin:15px 0 7px}input,textarea{width:100%;border:1px solid #344a75;background:#0b1630;color:white;border-radius:12px;padding:13px 14px;font:inherit;outline:none}input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #5c8dff22}textarea{min-height:130px;resize:vertical;line-height:1.5}.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px}button{border:0;border-radius:12px;padding:12px 18px;background:linear-gradient(110deg,#477df1,#8c63df);color:white;font-weight:750;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.secondary{background:#25385d;border:1px solid #405783}.hint{font-size:11px;color:var(--muted);line-height:1.6}.messages{display:flex;flex-direction:column;gap:12px;margin-top:20px}.msg{padding:14px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;font-size:13px}.user{background:#233c69;border:1px solid #3a5d98;align-self:flex-end;max-width:92%}.assistant{background:#17294a;border:1px solid #2c426d;align-self:stretch}.sidecard{padding:16px;border-radius:15px;background:#192b4d;margin-top:12px}.sidecard strong{display:block;font-size:13px;margin-bottom:6px}.sidecard span{font-size:12px;line-height:1.6;color:var(--muted)}.step{display:flex;gap:10px;margin:14px 0;color:var(--muted);font-size:12px;line-height:1.5}.num{flex:0 0 23px;height:23px;border-radius:8px;display:grid;place-items:center;background:#2a4372;color:#fff;font-weight:700}.foot{text-align:center;color:#8192b4;font-size:11px;margin-top:24px}
+    @media(max-width:760px){.shell{padding:18px 12px 35px}.grid{grid-template-columns:1fr}.hero{padding:23px}.top{align-items:flex-start}.brand h1{font-size:17px}.status{font-size:10px;padding:8px}.panel{padding:16px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand"><div class="mark">R</div><div><h1>Raymond AI</h1><p>COMMAND CENTER · CLOUD EDITION</p></div></div>
+    <div class="status"><span class="dot"></span> ENGINE ONLINE</div>
+  </header>
+  <section class="hero">
+    <div class="eyebrow">Your ideas, powered by AI</div>
+    <h2>What shall we build today?</h2>
+    <p>Describe the website or digital system you want in plain language. Raymond AI will help turn your idea into a clear implementation plan. Project file creation and automatic hosting are the next integration milestone.</p>
+  </section>
+  <main class="grid">
+    <section class="panel">
+      <h3>New command</h3>
+      <p class="sub">Write naturally. Include the type of website, its main features and who will use it.</p>
+      <label class="field" for="accessKey">Private access key</label>
+      <input id="accessKey" type="password" autocomplete="off" placeholder="Enter your Raymond AI access key">
+      <p class="hint">The key is kept only in this browser tab's session storage. Never share it with anyone.</p>
+      <label class="field" for="prompt">Your instruction</label>
+      <textarea id="prompt" maxlength="6000" placeholder="Example: Build a hotel management website with room booking, guest registration, payments, staff accounts and an admin dashboard."></textarea>
+      <div class="actions"><button id="send">Send command</button><button class="secondary" id="clear" type="button">Clear chat</button><span class="hint" id="state" aria-live="polite"></span></div>
+      <div class="messages" id="messages" aria-live="polite"></div>
+    </section>
+    <aside class="panel">
+      <h3>Command workflow</h3>
+      <p class="sub">The planned build pipeline.</p>
+      <div class="step"><span class="num">1</span><span><b>Understand</b><br>Read your natural-language request.</span></div>
+      <div class="step"><span class="num">2</span><span><b>Generate</b><br>Create project files and configuration.</span></div>
+      <div class="step"><span class="num">3</span><span><b>Test</b><br>Run checks and report errors.</span></div>
+      <div class="step"><span class="num">4</span><span><b>Deploy</b><br>Publish to your chosen hosting provider.</span></div>
+      <div class="sidecard"><strong>Current capability</strong><span>Cloud AI chat and implementation planning are live. File writing, build execution and website deployment are not connected yet.</span></div>
+      <div class="sidecard"><strong>Cloud service</strong><span>Cloudflare Workers AI<br>Model: Llama 3.2 1B Instruct</span></div>
+    </aside>
+  </main>
+  <div class="foot">Raymond AI · Built to work from your phone or computer</div>
+</div>
+<script>
+(() => {
+  const keyInput = document.getElementById('accessKey');
+  const promptInput = document.getElementById('prompt');
+  const send = document.getElementById('send');
+  const clear = document.getElementById('clear');
+  const messages = document.getElementById('messages');
+  const state = document.getElementById('state');
+  const saved = sessionStorage.getItem('raymond_ai_access_key');
+  if (saved) keyInput.value = saved;
+
+  function addMessage(text, role) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + role;
+    el.textContent = text;
+    messages.appendChild(el);
+    el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  async function submit() {
+    const key = keyInput.value.trim();
+    const prompt = promptInput.value.trim();
+    if (!key) { state.textContent = 'Enter your private access key first.'; keyInput.focus(); return; }
+    if (!prompt) { state.textContent = 'Write a command first.'; promptInput.focus(); return; }
+    sessionStorage.setItem('raymond_ai_access_key', key);
+    addMessage(prompt, 'user');
+    promptInput.value = '';
+    send.disabled = true;
+    state.textContent = 'Raymond AI is thinking…';
+    try {
+      const response = await fetch('/chat', {
+        method:'POST',
+        headers:{'content-type':'application/json','authorization':'Bearer ' + key},
+        body:JSON.stringify({prompt})
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'The request could not be completed.');
+      addMessage(data.answer || 'The AI returned an empty response.', 'assistant');
+      state.textContent = 'Response received.';
+    } catch (error) {
+      addMessage('Request failed: ' + error.message, 'assistant');
+      state.textContent = 'Check your key or connection.';
+    } finally { send.disabled = false; }
+  }
+  send.addEventListener('click', submit);
+  promptInput.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submit(); });
+  clear.addEventListener('click', () => { messages.replaceChildren(); state.textContent = 'Chat cleared.'; });
+})();
+</script>
+</body>
+</html>
