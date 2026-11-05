@@ -46,8 +46,12 @@ jobs:
           echo "$VERIFY" | jq -e '.success == true' >/dev/null
           echo "TOKEN_VALIDITY: $(echo "$VERIFY" | jq -r '.result.status // "unknown"')"
 
-          echo "Checking which Cloudflare account Wrangler can access..."
-          wrangler whoami
+          echo "Checking account discovery (the deploy already receives the account ID explicitly)..."
+          if wrangler whoami; then
+            echo "ACCOUNT_DISCOVERY: successful"
+          else
+            echo "::warning::Wrangler cannot list account IDs with this token. Continuing to test deployment using CLOUDFLARE_ACCOUNT_ID."
+          fi
 
       - name: Deploy Cloudflare Worker
         run: wrangler deploy --log-level debug
