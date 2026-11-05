@@ -119,8 +119,18 @@ export default {
       let parsed;
       try {
         const text = typeof raw === "string" ? raw : JSON.stringify(raw);
-        const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
-        parsed = JSON.parse(cleaned);
+        let cleaned = text.trim();
+        cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+        // Repair invalid JSON escapes before HTML angle brackets.
+        cleaned = cleaned.replace(/\\([<>])/g, "$1");
+        try {
+          parsed = JSON.parse(cleaned);
+        } catch {
+          const first = cleaned.indexOf("{");
+          const last = cleaned.lastIndexOf("}");
+          if (first < 0 || last <= first) throw new Error("No JSON object found");
+          parsed = JSON.parse(cleaned.slice(first, last + 1).replace(/\\([<>])/g, "$1"));
+        }
       } catch {
         return json({ ok: false, error: "The model did not return valid project-file JSON. Try a smaller or more specific project request.", model: MODEL, raw: typeof raw === "string" ? raw : JSON.stringify(raw) }, 502);
       }
