@@ -38,6 +38,7 @@ export default {
     }
 
     if (url.pathname !== "/chat" || request.method !== "POST") {
+      if (env.ASSETS && request.method === "GET") return env.ASSETS.fetch(request);
       return json({ ok: false, error: "Route not found." }, 404);
     }
 
