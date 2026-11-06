@@ -1,0 +1,4 @@
+{
+  "deploy": true,
+  "publish_dir": "."
+}
