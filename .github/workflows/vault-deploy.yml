@@ -67,22 +67,32 @@ jobs:
           fi
           echo "publish_dir=$PUBLISH_DIR" >> "$GITHUB_OUTPUT"
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
       - name: Run PHP syntax checks
         shell: bash
+        env:
+          PUBLISH_DIR: ${{ steps.config.outputs.publish_dir }}
         run: |
           set -euo pipefail
-          if find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.php' -print -quit | grep -q .; then
-            while IFS= read -r -d '' file; do php -l "$file"; done < <(find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.php' -print0)
+          if find "source/$PUBLISH_DIR" -type f -name '*.php' -print -quit | grep -q .; then
+            while IFS= read -r -d '' file; do php -l "$file"; done < <(find "source/$PUBLISH_DIR" -type f -name '*.php' -print0)
           else
             echo "No PHP files found; PHP lint not required."
           fi
 
       - name: Run JavaScript syntax checks
         shell: bash
+        env:
+          PUBLISH_DIR: ${{ steps.config.outputs.publish_dir }}
         run: |
           set -euo pipefail
-          if find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.js' -print -quit | grep -q .; then
-            while IFS= read -r -d '' file; do node --check "$file"; done < <(find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.js' -print0)
+          if find "source/$PUBLISH_DIR" -type f -name '*.js' -print -quit | grep -q .; then
+            while IFS= read -r -d '' file; do node --check "$file"; done < <(find "source/$PUBLISH_DIR" -type f -name '*.js' -print0)
           else
             echo "No JavaScript files found; JS syntax check not required."
           fi
