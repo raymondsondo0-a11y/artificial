@@ -1,3 +1,5 @@
+import { handleVaultDeploy } from "./vault.js";
+
 const MODEL = "@cf/meta/llama-3.2-1b-instruct";
 const MAX_PROMPT_LENGTH = 6000;
 const MAX_FILES = 8;
@@ -40,6 +42,10 @@ export default {
           "access-control-max-age": "86400"
         }
       });
+    }
+
+    if (url.pathname === "/vault/deploy") {
+      return handleVaultDeploy(request, env);
     }
 
     if (url.pathname === "/health" && request.method === "GET") {
