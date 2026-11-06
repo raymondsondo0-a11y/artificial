@@ -1,0 +1,117 @@
+name: Raymond Central Vault Deployment
+
+on:
+  repository_dispatch:
+    types: [raymond-vault-deploy]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: raymond-vault-${{ github.event.client_payload.source_repo }}
+  cancel-in-progress: false
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate deployment request
+        shell: bash
+        env:
+          SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
+          SOURCE_REPO_NAME: ${{ github.event.client_payload.source_repo_name }}
+          SOURCE_REF: ${{ github.event.client_payload.source_ref }}
+          SOURCE_SHA: ${{ github.event.client_payload.source_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_REPO" =~ ^raymondsondo0/[A-Za-z0-9_.-]+$ ]] || { echo "::error::Repository is not authorized."; exit 1; }
+          [[ "$SOURCE_REPO_NAME" =~ ^[A-Za-z0-9_.-]+$ ]] || { echo "::error::Invalid repository name."; exit 1; }
+          [[ "$SOURCE_REPO" == "raymondsondo0/$SOURCE_REPO_NAME" ]] || { echo "::error::Repository name mismatch."; exit 1; }
+          [[ "$SOURCE_REF" == "refs/heads/main" || "$SOURCE_REF" == "refs/heads/master" ]] || { echo "::error::Only main/master deployments are allowed."; exit 1; }
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Invalid commit SHA."; exit 1; }
+
+      - name: Create temporary read-only token for source repository
+        id: source-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RAYMOND_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RAYMOND_GITHUB_APP_PRIVATE_KEY }}
+          owner: raymondsondo0
+          repositories: ${{ github.event.client_payload.source_repo_name }}
+          permission-contents: read
+
+      - name: Checkout requested project
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.client_payload.source_repo }}
+          ref: ${{ github.event.client_payload.source_sha }}
+          token: ${{ steps.source-token.outputs.token }}
+          path: source
+
+      - name: Check deployment opt-in and publish directory
+        id: config
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONFIG="source/raymond-vault.json"
+          if [ ! -f "$CONFIG" ]; then
+            echo "::error::Add raymond-vault.json with deploy=true to opt this repository into hosting."
+            exit 1
+          fi
+          jq -e '.deploy == true' "$CONFIG" >/dev/null || { echo "::error::Deployment is not enabled in raymond-vault.json."; exit 1; }
+          PUBLISH_DIR="$(jq -r '.publish_dir // "."' "$CONFIG")"
+          [[ "$PUBLISH_DIR" != /* && "$PUBLISH_DIR" != *..* && "$PUBLISH_DIR" != *\\* ]] || { echo "::error::Unsafe publish_dir."; exit 1; }
+          if [ ! -d "source/$PUBLISH_DIR" ]; then
+            echo "::error::Configured publish_dir does not exist."
+            exit 1
+          fi
+          echo "publish_dir=$PUBLISH_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Run PHP syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.php' -print -quit | grep -q .; then
+            while IFS= read -r -d '' file; do php -l "$file"; done < <(find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.php' -print0)
+          else
+            echo "No PHP files found; PHP lint not required."
+          fi
+
+      - name: Run JavaScript syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.js' -print -quit | grep -q .; then
+            while IFS= read -r -d '' file; do node --check "$file"; done < <(find "source/${{ steps.config.outputs.publish_dir }}" -type f -name '*.js' -print0)
+          else
+            echo "No JavaScript files found; JS syntax check not required."
+          fi
+
+      - name: Verify FTP secrets
+        shell: bash
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: |
+          set -euo pipefail
+          for name in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_SERVER_DIR; do
+            if [ -z "${!name:-}" ]; then echo "::error::Missing central secret $name."; exit 1; fi
+          done
+          [[ "$FTP_SERVER_DIR" == /* ]] || { echo "::error::FTP_SERVER_DIR must be an absolute remote directory such as /htdocs/projects."; exit 1; }
+
+      - name: Publish to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}/${{ github.event.client_payload.source_repo_name }}/
+          local-dir: source/${{ steps.config.outputs.publish_dir }}/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/vendor/**
