@@ -1,0 +1,49 @@
+name: Deploy through Raymond Central Vault
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  request-central-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request deployment from Raymond Vault
+        shell: bash
+        env:
+          OIDC_REQUEST_URL: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_URL }}
+          OIDC_REQUEST_TOKEN: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const url = new URL(process.env.OIDC_REQUEST_URL);
+          url.searchParams.set("audience", "raymond-vault");
+          const identity = await fetch(url, {
+            headers: { Authorization: `Bearer ${process.env.OIDC_REQUEST_TOKEN}` }
+          });
+          if (!identity.ok) throw new Error(`GitHub OIDC request failed: ${identity.status}`);
+          const { value } = await identity.json();
+          const response = await fetch("https://raymond-ai-engine.raymondsondo0.workers.dev/vault/deploy", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${value}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              repository: process.env.REPOSITORY,
+              ref: process.env.REF,
+              sha: process.env.SHA
+            })
+          });
+          const result = await response.json();
+          if (!response.ok || !result.ok) throw new Error(result.error || `Vault rejected request: ${response.status}`);
+          console.log(result.message);
+          NODE
