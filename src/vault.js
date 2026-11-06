@@ -89,7 +89,7 @@ export async function handleVaultDeploy(request, env) {
       return new Response(JSON.stringify({ ok: false, error: "Central vault is not configured yet. Add the GitHub App ID and private key as Cloudflare Worker secrets." }), { status: 503, headers: { "content-type": "application/json" } });
     }
     const claims = await verifyGitHubOidc(match[1]);
-    if (claims.repository_owner !== "raymondsondo0" || typeof claims.repository !== "string" || !claims.repository.startsWith("raymondsondo0-a11y/")) {
+    if (claims.repository_owner !== "raymondsondo0-a11y" || typeof claims.repository !== "string" || !claims.repository.startsWith("raymondsondo0-a11y/")) {
       return new Response(JSON.stringify({ ok: false, error: "This repository owner is not authorized for Raymond Vault." }), { status: 403, headers: { "content-type": "application/json" } });
     }
     if (!["refs/heads/main", "refs/heads/master"].includes(claims.ref)) {
