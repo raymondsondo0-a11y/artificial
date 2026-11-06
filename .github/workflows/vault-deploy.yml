@@ -32,11 +32,11 @@ jobs:
 
       - name: Create temporary read-only token for source repository
         id: source-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RAYMOND_GITHUB_APP_ID }}
           private-key: ${{ secrets.RAYMOND_GITHUB_APP_PRIVATE_KEY }}
-          owner: raymondsondo0
+          owner: raymondsondo0-a11y
           repositories: ${{ github.event.client_payload.source_repo_name }}
           permission-contents: read
 
@@ -60,7 +60,7 @@ jobs:
           fi
           jq -e '.deploy == true' "$CONFIG" >/dev/null || { echo "::error::Deployment is not enabled in raymond-vault.json."; exit 1; }
           PUBLISH_DIR="$(jq -r '.publish_dir // "."' "$CONFIG")"
-          [[ "$PUBLISH_DIR" != /* && "$PUBLISH_DIR" != *..* && "$PUBLISH_DIR" != *\\* ]] || { echo "::error::Unsafe publish_dir."; exit 1; }
+          [[ "$PUBLISH_DIR" =~ ^[A-Za-z0-9._/-]+$ && "$PUBLISH_DIR" != /* && ! "$PUBLISH_DIR" =~ (^|/)\.\.(/|$) ]] || { echo "::error::Unsafe publish_dir."; exit 1; }
           if [ ! -d "source/$PUBLISH_DIR" ]; then
             echo "::error::Configured publish_dir does not exist."
             exit 1
