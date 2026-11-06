@@ -2,7 +2,7 @@
 
 ## Purpose
 
-One central deployment control plane for repositories owned by `raymondsondo0`. Project repositories do not store GitHub PATs, Cloudflare tokens, or InfinityFree FTP credentials.
+One central deployment control plane for repositories owned by `raymondsondo0-a11y`. Project repositories do not store GitHub PATs, Cloudflare tokens, or InfinityFree FTP credentials.
 
 ## Architecture
 
@@ -57,14 +57,14 @@ Copy `templates/raymond-vault-deploy.yml` into the project's `.github/workflows/
 }
 ```
 
-Set `publish_dir` to the website folder, such as `public`, `htdocs`, or `.`. The project must be owned by `raymondsondo0` and deploy from `main` or `master`.
+Set `publish_dir` to the website folder, such as `public`, `htdocs`, or `.`. The project must be owned by `raymondsondo0-a11y` and deploy from `main` or `master`.
 
 No repository secrets are required in the project repository. A new repository only needs the caller workflow and opt-in config.
 
 ## Safety boundaries
 
 - OIDC tokens are short-lived and validated cryptographically.
-- Only repositories owned by `raymondsondo0` and main/master refs are accepted.
+- Only repositories owned by `raymondsondo0-a11y` and main/master refs are accepted.
 - The central deployment workflow checks the opt-in file before publishing.
 - FTP credentials remain only in central repository secrets.
 - Each project publishes to a separate subdirectory; it does not overwrite the domain root.
