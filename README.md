@@ -29,7 +29,7 @@ The private access key is stored as a Worker secret by the deployment workflow a
 
 ## Important limitations
 
-Project generation currently returns downloadable files. It does not yet commit generated projects to GitHub, run their build/tests, or deploy them to InfinityFree. Those steps require a separate authenticated execution and hosting integration. Generated code must be reviewed before use. Workers AI usage is subject to Cloudflare's current service limits and free allocation.
+AI project generation still returns downloadable files; it is not yet wired to commit the generated bundle automatically into a selected repository. The Central Vault deployment path is scaffolded for repositories that opt in, but it requires the one-time GitHub App and central FTP credentials before it can run. The current checks are PHP and JavaScript syntax checks, not full end-to-end tests. Generated code should be reviewed before use. Workers AI usage is subject to Cloudflare's current service limits and free allocation.
 
 ## Raymond Central Vault
 
