@@ -16,18 +16,16 @@ jobs:
       - name: Request deployment from Raymond Vault
         shell: bash
         env:
-          OIDC_REQUEST_URL: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_URL }}
-          OIDC_REQUEST_TOKEN: ${{ secrets.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
           SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const url = new URL(process.env.OIDC_REQUEST_URL);
+          node --input-type=module <<'NODE'
+          const url = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
           url.searchParams.set("audience", "raymond-vault");
           const identity = await fetch(url, {
-            headers: { Authorization: `Bearer ${process.env.OIDC_REQUEST_TOKEN}` }
+            headers: { Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` }
           });
           if (!identity.ok) throw new Error(`GitHub OIDC request failed: ${identity.status}`);
           const { value } = await identity.json();
