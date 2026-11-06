@@ -17,7 +17,7 @@ One central deployment control plane for repositories owned by `raymondsondo0-a1
 
 ### Cloudflare Worker secrets
 
-Set these secrets on the `raymond-ai-engine` Worker:
+Add these two secrets once to the central `artificial` repository. The existing Cloudflare deployment workflow copies them into the Worker as encrypted Worker secrets:
 
 - `RAYMOND_GITHUB_APP_ID`
 - `RAYMOND_GITHUB_APP_PRIVATE_KEY`
